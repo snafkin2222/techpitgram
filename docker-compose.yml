@@ -1,0 +1,40 @@
+version: '3'
+
+volumes:
+  db-data:
+
+services:
+  db:
+    image: postgres:13
+    volumes:
+      - 'db-data:/var/lib/postgresql/data'
+    environment:
+      - 'POSTGRES_USER=postgres'
+      - 'POSTGRES_PASSWORD=postgres'
+      - 'POSTGRES_HOST_AUTH_METHOD=trust'
+
+    # 順次 -"330X:3306"へ変更 追記：変更に意味はない
+    ports:
+      - "3306:3306"
+
+  web:
+    build: .
+    # command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -p 3000 -b '0.0.0.0'"
+    command: rails s -p 3000 -b '0.0.0.0'
+    volumes: 
+      - .:/techpitgram
+    environment:
+
+      - 'DATABASE_HOST=db'
+      
+      - 'DATABASE_PASSWORD=postgres'
+    tty: true
+    stdin_open: true
+    # db作成後にコンテナ作成
+    depends_on: 
+      - db
+    # 順次 -"300X:3000"へ変更
+    ports:
+      - "3003:3000"
+    links:
+      - db
